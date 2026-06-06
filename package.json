@@ -5,16 +5,16 @@
   "main": "./out/main/index.js",
   "author": {
     "name": "DeathkKhan",
-    "email": "DeathkKhan@users.noreply.github.com"
+    "email": "DeathKhan@users.noreply.github.com"
   },
   "license": "GPL-3.0-or-later",
-  "homepage": "https://github.com/DeathkKhan/typst-studio",
+  "homepage": "https://github.com/DeathKhan/typst-studio",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DeathkKhan/typst-studio.git"
+    "url": "https://github.com/DeathKhan/typst-studio.git"
   },
   "bugs": {
-    "url": "https://github.com/DeathkKhan/typst-studio/issues"
+    "url": "https://github.com/DeathKhan/typst-studio/issues"
   },
   "engines": {
     "node": ">=20"
@@ -63,6 +63,7 @@
   "build": {
     "appId": "com.typst.studio",
     "productName": "Typst Studio",
+    "icon": "build/icon.png",
     "directories": {
       "output": "release"
     },
@@ -70,6 +71,10 @@
       "out/**/*"
     ],
     "extraResources": [
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      },
       {
         "from": "resources/bin",
         "to": "bin",
@@ -88,7 +93,7 @@
         "deb"
       ],
       "category": "Office",
-      "maintainer": "DeathkKhan <DeathkKhan@users.noreply.github.com>"
+      "maintainer": "DeathkKhan <DeathKhan@users.noreply.github.com>"
     }
   }
 }

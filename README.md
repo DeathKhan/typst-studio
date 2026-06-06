@@ -16,7 +16,7 @@ Typst Studio runs [Tinymist](https://github.com/Myriad-Dreamin/tinymist) for lan
 
 ### Linux (AppImage)
 
-Download the latest AppImage from [GitHub Releases](https://github.com/DeathkKhan/typst-studio/releases), make it executable, and run it:
+Download the latest AppImage from [GitHub Releases](https://github.com/DeathKhan/typst-studio/releases), make it executable, and run it:
 
 ```bash
 chmod +x "Typst Studio-"*.AppImage
@@ -27,7 +27,11 @@ The AppImage bundles Tinymist. Install the [Typst CLI](https://github.com/typst/
 
 ### Arch Linux (AUR)
 
-An AUR package is planned. Until it is published, use the AppImage or build from source below.
+```bash
+yay -S typst-studio-bin
+```
+
+Requires [Typst](https://archlinux.org/packages/extra/x86_64/typst/) for PDF export. Until the AUR package is available, use the AppImage or build from source below.
 
 ### Build from source
 
@@ -39,7 +43,7 @@ An AUR package is planned. Until it is published, use the AppImage or build from
 - Tinymist — downloaded automatically by `npm install`, or install [tinymist](https://github.com/Myriad-Dreamin/tinymist) yourself
 
 ```bash
-git clone https://github.com/DeathkKhan/typst-studio.git
+git clone https://github.com/DeathKhan/typst-studio.git
 cd typst-studio
 npm install
 npm run dev

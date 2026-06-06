@@ -41,11 +41,24 @@ function send(channel: string, ...args: unknown[]): void {
   mainWindow?.webContents.send(channel, ...args)
 }
 
+function appIconPath(): string | undefined {
+  const candidates = [
+    join(app.getAppPath(), 'build/icon.png'),
+    join(process.resourcesPath, 'icon.png')
+  ]
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate
+  }
+  return undefined
+}
+
 function createWindow(): void {
+  const icon = appIconPath()
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
     title: 'Typst Studio',
+    ...(icon ? { icon } : {}),
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
