@@ -31,7 +31,7 @@ The AppImage bundles Tinymist. Install the [Typst CLI](https://github.com/typst/
 yay -S typst-studio-bin
 ```
 
-Requires [Typst](https://archlinux.org/packages/extra/x86_64/typst/) for PDF export. Until the AUR package is available, use the AppImage or build from source below.
+Requires [Typst](https://archlinux.org/packages/extra/x86_64/typst/) for PDF export. Tinymist is bundled in the AppImage.
 
 ### Build from source
 
