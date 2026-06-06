@@ -1,0 +1,875 @@
+* {
+  box-sizing: border-box;
+}
+
+/* Themed scrollbars (app panels + CodeMirror) */
+.app,
+.app * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ts-muted) var(--ts-surface);
+}
+
+.app ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.app ::-webkit-scrollbar-track {
+  background: var(--ts-surface);
+}
+
+.app ::-webkit-scrollbar-thumb {
+  background: var(--ts-muted);
+  border-radius: 5px;
+  border: 2px solid var(--ts-surface);
+}
+
+.app ::-webkit-scrollbar-thumb:hover {
+  background: var(--ts-accent);
+}
+
+.app ::-webkit-scrollbar-corner {
+  background: var(--ts-surface);
+}
+
+.cm-scroller {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ts-muted) var(--ts-bg);
+}
+
+.cm-scroller::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.cm-scroller::-webkit-scrollbar-track {
+  background: var(--ts-bg);
+}
+
+.cm-scroller::-webkit-scrollbar-thumb {
+  background: var(--ts-muted);
+  border-radius: 5px;
+  border: 2px solid var(--ts-bg);
+}
+
+.cm-scroller::-webkit-scrollbar-thumb:hover {
+  background: var(--ts-accent);
+}
+
+.cm-scroller::-webkit-scrollbar-corner {
+  background: var(--ts-bg);
+}
+
+.boot-error {
+  margin: 0;
+  min-height: 100vh;
+  padding: 24px 32px;
+  background: var(--ts-bg, #1e1e1e);
+  color: var(--ts-fg, #e0e0e0);
+  font-family: system-ui, sans-serif;
+}
+
+.boot-error h1 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+
+.boot-error pre {
+  white-space: pre-wrap;
+  background: var(--ts-surface, #2a2a2a);
+  padding: 12px;
+  border-radius: 6px;
+  color: var(--ts-error, #f88);
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  font-family: system-ui, sans-serif;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--ts-bg);
+  color: var(--ts-fg);
+}
+
+.app-chrome {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--ts-border);
+  background: var(--ts-surface);
+}
+
+.menubar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  min-height: 32px;
+}
+
+.menubar-menus {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.menubar-spacer {
+  flex: 1;
+  min-width: 8px;
+}
+
+.menubar-title {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ts-muted);
+  font-size: 0.85rem;
+  max-width: 40%;
+}
+
+.menubar-quick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.menubar-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--ts-fg);
+  cursor: pointer;
+  user-select: none;
+}
+
+.menu-group {
+  position: relative;
+}
+
+.menu-trigger {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ts-fg);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.menu-trigger:hover,
+.menu-trigger.active {
+  background: var(--ts-hover);
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 200;
+  min-width: 200px;
+  margin-top: 2px;
+  padding: 4px 0;
+  background: var(--ts-surface);
+  border: 1px solid var(--ts-border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px var(--ts-shadow);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--ts-fg);
+  text-align: left;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: var(--ts-hover);
+}
+
+.menu-check .menu-checkmark {
+  display: inline-block;
+  width: 1.1em;
+  flex-shrink: 0;
+  color: var(--ts-accent);
+  font-weight: bold;
+}
+
+.menu-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--ts-border);
+}
+
+.workspace-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ts-muted);
+  padding: 24px;
+  text-align: center;
+}
+
+.btn-sm,
+.btn-primary {
+  padding: 4px 10px;
+  cursor: pointer;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-selection);
+  color: var(--ts-fg);
+}
+
+.btn-sm:hover,
+.btn-primary:hover {
+  background: var(--ts-accent);
+  color: var(--ts-bg);
+  border-color: var(--ts-accent);
+}
+
+.workspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.outline-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 120px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.outline-shell .outline-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-right: none;
+}
+
+.outline-panel {
+  background: var(--ts-surface);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.resize-handle {
+  flex-shrink: 0;
+  z-index: 2;
+  touch-action: none;
+}
+
+.resize-handle-x {
+  position: relative;
+  width: 6px;
+  flex: 0 0 6px;
+  cursor: col-resize;
+  background: var(--ts-border);
+}
+
+.resize-handle-x::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -5px;
+  right: -5px;
+}
+
+.resize-handle-y {
+  position: relative;
+  height: 6px;
+  flex: 0 0 6px;
+  cursor: row-resize;
+  background: var(--ts-border);
+}
+
+.resize-handle-y::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -5px;
+  bottom: -5px;
+}
+
+.resize-handle:hover,
+.resize-handle:active {
+  background: var(--ts-accent);
+}
+
+.split-segment {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.split-segment-grow {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.split-segment .editor-pane,
+.split-segment .preview-pane {
+  flex: 1;
+  min-height: 0;
+}
+
+.main-split {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.layout-top .main-split {
+  flex-direction: column;
+}
+
+.layout-side .main-split {
+  flex-direction: row;
+}
+
+.editor-pane,
+.preview-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--ts-bg);
+}
+
+.pane-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 32px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1;
+  border-bottom: 1px solid var(--ts-border);
+  background: var(--ts-surface);
+  color: var(--ts-fg);
+  overflow: hidden;
+}
+
+.preview-header .preview-mode-tag {
+  flex-shrink: 0;
+}
+
+.preview-header .btn-sm {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+}
+
+.preview-mode-tag {
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+}
+
+.preview-mode-tag {
+  font-weight: normal;
+  color: var(--ts-muted);
+}
+
+.editor-host {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-host-inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-host-inner .cm-editor {
+  /* Required so CodeMirror panels (find + vim command line) are visible */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-host-inner .cm-scroller {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.editor-host-inner .cm-panels-bottom {
+  flex: 0 0 auto;
+  position: relative;
+  top: auto;
+  bottom: auto;
+}
+
+/* Vim status/command line is hoisted into .editor-vim-status-host */
+.editor-host-vim .cm-panels-bottom {
+  display: none;
+}
+
+.editor-vim-status-host {
+  flex-shrink: 0;
+  height: 28px;
+}
+
+.editor-vim-status-host .editor-vim-statusbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 28px;
+  padding: 3px 10px;
+  box-sizing: border-box;
+  border-top: 1px solid var(--ts-border);
+  background: var(--ts-surface);
+  color: var(--ts-fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+}
+
+.editor-vim-status-host .editor-status-pos {
+  margin-left: auto;
+  color: var(--ts-muted);
+  flex-shrink: 0;
+}
+
+.editor-vim-status-host .editor-status-mode {
+  color: var(--ts-accent);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.editor-vim-status-host .editor-status-pending {
+  color: var(--ts-muted);
+  max-width: 28%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+
+.editor-vim-status-host .editor-status-spacer {
+  flex: 1;
+  min-width: 8px;
+}
+
+/* Vim `:` / `/` prompt — single inline field, not a separate widget */
+.editor-vim-status-host .editor-vim-command {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  max-width: min(48vw, 480px);
+}
+
+.editor-vim-status-host .editor-vim-dialog {
+  display: flex !important;
+  align-items: center;
+  flex: 1 1 auto !important;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.editor-vim-status-host .editor-vim-dialog-inner {
+  display: flex !important;
+  align-items: center;
+  flex: 1 1 auto !important;
+  min-width: 0;
+  gap: 4px;
+  margin: 0;
+  height: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  background: var(--ts-bg);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ts-accent) 12%, transparent);
+}
+
+.editor-vim-status-host .editor-vim-dialog-label {
+  color: var(--ts-accent) !important;
+  font-weight: 600;
+  font-family: inherit !important;
+  flex: 0 0 auto !important;
+}
+
+.editor-vim-status-host .editor-vim-dialog-helper {
+  display: none !important;
+}
+
+.editor-vim-status-host .editor-vim-dialog-input {
+  flex: 1 1 auto !important;
+  min-width: 5em;
+  width: auto;
+  margin: 0;
+  font-size: 11px !important;
+  line-height: 1.05;
+  padding: 0 !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: var(--ts-fg) !important;
+  font: inherit !important;
+  box-shadow: none !important;
+  appearance: none;
+}
+
+.editor-vim-status-host .editor-vim-dialog-input:focus {
+  outline: none !important;
+}
+
+.editor-vim-status-host .editor-vim-dialog-input::placeholder {
+  color: var(--ts-muted);
+}
+
+.editor-statusbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 4px 10px;
+  min-height: 26px;
+  border-top: 1px solid var(--ts-border);
+  background: var(--ts-surface);
+  color: var(--ts-fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+}
+
+.editor-status-mode {
+  color: var(--ts-accent);
+  font-weight: 600;
+}
+
+.editor-status-pending {
+  color: var(--ts-fg);
+  opacity: 0.85;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-status-spacer {
+  flex: 1;
+}
+
+.editor-status-pos {
+  color: var(--ts-muted);
+}
+
+.preview-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background: var(--ts-bg);
+}
+
+.preview-body .preview-placeholder {
+  color: var(--ts-muted);
+}
+
+.preview-body .pdf-preview {
+  background: var(--ts-bg);
+}
+
+.preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--ts-bg);
+}
+
+.preview-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--ts-muted);
+}
+
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--ts-muted);
+  text-align: center;
+  padding: 16px;
+}
+
+.preview-error {
+  color: var(--ts-error);
+}
+
+.editor-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ts-muted);
+  padding: 16px;
+  text-align: center;
+}
+
+.editor-error {
+  color: var(--ts-error);
+}
+
+.pdf-preview {
+  overflow: auto;
+  height: 100%;
+  text-align: center;
+}
+
+.pdf-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px;
+}
+
+.outline-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.problems-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px;
+}
+
+.outline-row,
+.problem-row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: var(--ts-fg);
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+.outline-row:hover,
+.problem-row:hover {
+  background: var(--ts-hover);
+}
+
+.outline-row.selected {
+  background: var(--ts-accent-soft);
+  color: var(--ts-fg);
+}
+
+.problems-panel {
+  border-top: 1px solid var(--ts-border);
+  background: var(--ts-surface);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.problem-loc {
+  color: var(--ts-muted);
+  margin-right: 8px;
+  font-size: 0.75rem;
+}
+
+.problem-row.error .problem-msg {
+  color: var(--ts-error);
+}
+
+.statusbar {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border-top: 1px solid var(--ts-border);
+  background: var(--ts-surface);
+  color: var(--ts-muted);
+  flex-shrink: 0;
+}
+
+.muted {
+  color: var(--ts-muted);
+  font-size: 0.85rem;
+  padding: 8px;
+}
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--ts-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.settings-dialog {
+  display: flex;
+  flex-direction: column;
+  background: var(--ts-surface);
+  color: var(--ts-fg);
+  border-radius: 8px;
+  border: 1px solid var(--ts-border);
+  box-shadow: 0 8px 32px var(--ts-shadow);
+  max-width: 520px;
+  width: min(520px, 92vw);
+  max-height: 85vh;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ts-border);
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.settings-body {
+  flex: 1;
+  overflow: auto;
+  padding: 12px 20px 8px;
+}
+
+.settings-footer {
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--ts-border);
+  text-align: right;
+}
+
+.settings-dialog section {
+  margin-bottom: 20px;
+}
+
+.settings-dialog h3 {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--ts-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.settings-hint {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--ts-muted);
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+
+.settings-grid label,
+.settings-range {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.settings-range input[type='range'] {
+  width: 100%;
+  margin-top: 2px;
+}
+
+.settings-checkgrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.settings-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.settings-dialog input[type='number'],
+.settings-dialog select {
+  background: var(--ts-bg);
+  color: var(--ts-fg);
+  border: 1px solid var(--ts-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.btn-primary {
+  margin-top: 8px;
+  background: var(--ts-accent);
+  color: var(--ts-bg);
+  border-color: var(--ts-accent);
+}
+
+.error {
+  color: var(--ts-error);
+}

@@ -1,0 +1,94 @@
+{
+  "name": "typst-studio",
+  "version": "0.1.0",
+  "description": "Typst editor with Tinymist LSP and live HTML preview",
+  "main": "./out/main/index.js",
+  "author": {
+    "name": "DeathkKhan",
+    "email": "DeathkKhan@users.noreply.github.com"
+  },
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/DeathkKhan/typst-studio",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DeathkKhan/typst-studio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DeathkKhan/typst-studio/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "postinstall": "bash scripts/postinstall.sh",
+    "install-electron": "bash scripts/install-electron.sh",
+    "predev": "bash scripts/install-electron.sh",
+    "dev": "electron-vite dev",
+    "dev:arch": "bash scripts/run-dev.sh",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "predist": "FORCE_BUNDLE=1 npm run download-tinymist",
+    "dist": "npm run build && electron-builder",
+    "download-tinymist": "bash scripts/download-tinymist.sh"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.8.0",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/lint": "^6.8.4",
+    "@codemirror/search": "^6.5.9",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@codemirror/view": "^6.36.4",
+    "@replit/codemirror-vim": "^6.3.0",
+    "codemirror-lang-typst": "^0.4.0",
+    "pdfjs-dist": "^4.10.38",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vscode-jsonrpc": "^8.2.0",
+    "vscode-languageserver-protocol": "^3.17.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^34.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^3.0.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0"
+  },
+  "build": {
+    "appId": "com.typst.studio",
+    "productName": "Typst Studio",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/bin",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "examples",
+        "to": "examples"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office",
+      "maintainer": "DeathkKhan <DeathkKhan@users.noreply.github.com>"
+    }
+  }
+}

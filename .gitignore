@@ -1,0 +1,14 @@
+node_modules/
+out/
+release/
+dist/
+resources/bin/
+
+# Copied from codemirror-lang-typst by scripts/postinstall.sh
+src/renderer/assets/*.wasm
+
+*.log
+.DS_Store
+.env
+.env.*
+*.local
