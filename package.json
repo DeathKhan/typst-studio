@@ -63,6 +63,7 @@
   "build": {
     "appId": "com.typst.studio",
     "productName": "Typst Studio",
+    "artifactName": "typst-studio-${version}.${ext}",
     "icon": "build/icon.png",
     "directories": {
       "output": "release"

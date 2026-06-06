@@ -19,8 +19,8 @@ Typst Studio runs [Tinymist](https://github.com/Myriad-Dreamin/tinymist) for lan
 Download the latest AppImage from [GitHub Releases](https://github.com/DeathKhan/typst-studio/releases), make it executable, and run it:
 
 ```bash
-chmod +x "Typst Studio-"*.AppImage
-./"Typst Studio-"*.AppImage
+chmod +x typst-studio-*.AppImage
+./typst-studio-*.AppImage
 ```
 
 The AppImage bundles Tinymist. Install the [Typst CLI](https://github.com/typst/typst) separately if you want PDF export or PDF preview mode.
