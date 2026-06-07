@@ -25,7 +25,22 @@ chmod +x typst-studio-*.AppImage
 ./typst-studio-*.AppImage
 ```
 
-The AppImage bundles Tinymist. Install the [Typst CLI](https://github.com/typst/typst) separately if you want PDF export or PDF preview mode.
+**Runtime dependencies** (not bundled in the AppImage):
+
+| Package | Arch | Debian / Ubuntu | Fedora |
+|---------|------|-----------------|--------|
+| FUSE 2 (required to launch AppImages) | `fuse2` | `libfuse2` | `fuse` |
+| GTK 3 (Electron UI / dialogs) | `gtk3` | `libgtk-3-0` | `gtk3` |
+
+Example on Arch:
+
+```bash
+sudo pacman -S fuse2 gtk3
+```
+
+If FUSE is unavailable, you can run `./typst-studio-*.AppImage --appimage-extract-and-run` (slower startup; extracts to a temp dir each time).
+
+The AppImage bundles Tinymist. Install the [Typst CLI](https://github.com/typst/typst) separately if you want PDF export or PDF preview mode. Prefer the `.deb` on Debian/Ubuntu if you want `apt` to pull dependencies automatically.
 
 ### Windows
 
@@ -37,7 +52,7 @@ Download `typst-studio-*-win.zip` from [GitHub Releases](https://github.com/Deat
 yay -S typst-studio-bin
 ```
 
-Requires [Typst](https://archlinux.org/packages/extra/x86_64/typst/) for PDF export. Tinymist is bundled in the AppImage.
+The AUR package extracts the AppImage at install time and runs `/opt/typst-studio/AppRun`, so **FUSE is not required** to launch the app. Requires [Typst](https://archlinux.org/packages/extra/x86_64/typst/) for PDF export. Tinymist is bundled.
 
 ### Build from source
 

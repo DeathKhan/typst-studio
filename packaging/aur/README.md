@@ -8,7 +8,7 @@ Packages the [Typst Studio](https://github.com/DeathKhan/typst-studio) AppImage 
 yay -S typst-studio-bin
 ```
 
-Requires [typst](https://archlinux.org/packages/extra/x86_64/typst/) for PDF export. Tinymist is bundled in the AppImage.
+Requires [typst](https://archlinux.org/packages/extra/x86_64/typst/) for PDF export. The package extracts the upstream AppImage at install time (no FUSE needed at runtime). Tinymist is bundled.
 
 ## Build locally
 
