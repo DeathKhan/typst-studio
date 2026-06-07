@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as pdfjs from 'pdfjs-dist'
+import type { PreviewPageInfo } from '../lib/preview-page-info'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -9,9 +10,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 export interface PdfPreviewProps {
   pdfPath: string | null
   zoom: number
+  onPageInfo?: (info: PreviewPageInfo) => void
 }
 
-export function PdfPreview({ pdfPath, zoom }: PdfPreviewProps): React.ReactElement {
+export function PdfPreview({ pdfPath, zoom, onPageInfo }: PdfPreviewProps): React.ReactElement {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [pageCount, setPageCount] = useState(1)
   const [page, setPage] = useState(1)
@@ -45,6 +47,10 @@ export function PdfPreview({ pdfPath, zoom }: PdfPreviewProps): React.ReactEleme
       cancelled = true
     }
   }, [pdfPath, page, zoom])
+
+  useEffect(() => {
+    onPageInfo?.({ page, total: pageCount })
+  }, [page, pageCount, onPageInfo])
 
   return (
     <div className="pdf-preview">

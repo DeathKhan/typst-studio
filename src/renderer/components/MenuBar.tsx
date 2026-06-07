@@ -6,6 +6,7 @@ export interface MenuBarProps {
   documentTitle: string
   onPatch: (partial: Partial<Settings>) => void
   onOpen: () => void
+  onOpenFolder: () => void
   onSave: () => void
   onSaveAs: () => void
   onRefreshPreview: () => void
@@ -13,9 +14,15 @@ export interface MenuBarProps {
   onOpenSettings: () => void
 }
 
-type PanelKey = 'show_toolbar' | 'show_outline' | 'show_source' | 'show_preview' | 'show_problems'
+type PanelKey =
+  | 'show_explorer'
+  | 'show_outline'
+  | 'show_source'
+  | 'show_preview'
+  | 'show_problems'
 
 const VIEW_ITEMS: Array<{ key: PanelKey; label: string }> = [
+  { key: 'show_explorer', label: 'Explorer' },
   { key: 'show_outline', label: 'Outline' },
   { key: 'show_source', label: 'Source' },
   { key: 'show_preview', label: 'Preview' },
@@ -27,6 +34,7 @@ export function MenuBar({
   documentTitle,
   onPatch,
   onOpen,
+  onOpenFolder,
   onSave,
   onSaveAs,
   onRefreshPreview,
@@ -76,6 +84,13 @@ export function MenuBar({
             <div className="menu-dropdown">
               <button type="button" className="menu-item" onClick={() => { setOpenMenu(null); onOpen() }}>
                 Open…
+              </button>
+              <button
+                type="button"
+                className="menu-item"
+                onClick={() => { setOpenMenu(null); onOpenFolder() }}
+              >
+                Open Folder…
               </button>
               <button type="button" className="menu-item" onClick={() => { setOpenMenu(null); onSave() }}>
                 Save

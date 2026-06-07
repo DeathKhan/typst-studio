@@ -3,6 +3,7 @@ import type { EditorView } from '@codemirror/view'
 import { EditorPane } from './components/EditorPane'
 import { PreviewPane } from './components/PreviewPane'
 import { OutlinePanel } from './components/OutlinePanel'
+import { ProjectPanel } from './components/ProjectPanel'
 import { ProblemsPanel } from './components/ProblemsPanel'
 import { SettingsDialog } from './components/SettingsDialog'
 import { MenuBar } from './components/MenuBar'
@@ -25,6 +26,7 @@ export default function App(): React.ReactElement {
   const [diagnostics, setDiagnostics] = useState<DiagnosticItem[]>([])
   const [outline, setOutline] = useState<OutlineEntry[]>([])
   const [outlineLine, setOutlineLine] = useState<number | null>(null)
+  const [projectRoot, setProjectRoot] = useState<string | null>(null)
   const [jumpTo, setJumpTo] = useState<{ line: number; col: number; key: number } | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [previewReady, setPreviewReady] = useState(false)
@@ -35,6 +37,7 @@ export default function App(): React.ReactElement {
   const scrollPreviewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const filePathRef = useRef<string | null>(null)
   const workspaceRef = useRef<HTMLDivElement | null>(null)
+  const sidebarShellRef = useRef<HTMLDivElement | null>(null)
   const mainSplitRef = useRef<HTMLElement | null>(null)
   const settingsRef = useRef(settings)
   settingsRef.current = settings
@@ -89,6 +92,7 @@ export default function App(): React.ReactElement {
       setContent(doc.content)
       setFilePath(doc.path)
       setOutline(parseOutline(doc.content))
+      setProjectRoot(await window.typstStudio.getProjectRoot())
       await refreshPreview()
       if (cancelled) return
       settingsReadyRef.current = true
@@ -122,6 +126,9 @@ export default function App(): React.ReactElement {
       }),
       window.typstStudio.onPdfUpdated((r) => {
         if (r.ok && r.pdfPath) setPdfPath(r.pdfPath)
+      }),
+      window.typstStudio.onProjectRootChanged((root) => {
+        setProjectRoot(root)
       })
     ]
     return () => {
@@ -158,6 +165,7 @@ export default function App(): React.ReactElement {
     settings.tinymist_partial_rendering,
     settings.tinymist_invert_colors,
     settings.preview_match_theme,
+    settings.preview_invert_images,
     settings.theme
   ])
 
@@ -228,6 +236,34 @@ export default function App(): React.ReactElement {
     }
   }
 
+  const handleOpenFolder = async (): Promise<void> => {
+    const r = await window.typstStudio.openProjectFolder()
+    if (!r) return
+    setProjectRoot(r.root)
+    if (r.opened) {
+      setContent(r.opened.content)
+      setFilePath(r.opened.path)
+      setOutline(parseOutline(r.opened.content))
+      await refreshPreview()
+    } else {
+      setStatus(`Project: ${r.root}`)
+    }
+  }
+
+  const handleOpenProjectFile = async (path: string): Promise<void> => {
+    if (!path.endsWith('.typ')) {
+      await window.typstStudio.openExternal(`file://${path}`)
+      return
+    }
+    const r = await window.typstStudio.openProjectFile(path)
+    if (r) {
+      setContent(r.content)
+      setFilePath(r.path)
+      setOutline(parseOutline(r.content))
+      await refreshPreview()
+    }
+  }
+
   const handleCursor = (line: number, col: number): void => {
     setCursorLine(line)
     setCursorCol(col)
@@ -235,6 +271,7 @@ export default function App(): React.ReactElement {
 
   const layoutTop = settings.split === 'editor_top'
   const layoutClass = layoutTop ? 'layout-top' : 'layout-side'
+  const bothSidebarPanels = settings.show_explorer && settings.show_outline
 
   const resizeEditor = useCallback(
     (delta: number) => {
@@ -270,6 +307,7 @@ export default function App(): React.ReactElement {
           documentTitle={filePath?.split('/').pop() ?? 'Untitled.typ'}
           onPatch={(partial) => persistSettings({ ...settings, ...partial })}
           onOpen={() => void handleOpen()}
+          onOpenFolder={() => void handleOpenFolder()}
           onSave={() => void handleSave()}
           onSaveAs={() => void handleSaveAs()}
           onRefreshPreview={() => void refreshPreview(true)}
@@ -279,23 +317,65 @@ export default function App(): React.ReactElement {
       </header>
 
       <div className="workspace" ref={workspaceRef}>
-        {settings.show_outline && (
+        {(settings.show_explorer || settings.show_outline) && (
           <>
             <div
-              className="outline-shell"
+              className="sidebar-shell"
+              ref={sidebarShellRef}
               style={{
                 flex: `0 0 ${settings.layout_outline_width}px`,
                 width: settings.layout_outline_width
               }}
             >
-              <OutlinePanel
-                entries={outline}
-                selectedLine={outlineLine}
-                onSelect={(line, col) => {
-                  setOutlineLine(line)
-                  jumpToLine(line, col)
-                }}
-              />
+              {settings.show_explorer && (
+                <div
+                  className="sidebar-segment sidebar-project"
+                  style={
+                    bothSidebarPanels
+                      ? { flex: `0 0 ${settings.layout_sidebar_project_ratio * 100}%` }
+                      : { flex: 1 }
+                  }
+                >
+                  <ProjectPanel
+                    projectRoot={projectRoot}
+                    activeFile={filePath}
+                    onOpenFolder={() => void handleOpenFolder()}
+                    onOpenFile={(path) => void handleOpenProjectFile(path)}
+                  />
+                </div>
+              )}
+              {bothSidebarPanels && (
+                <ResizeHandle
+                  axis="y"
+                  onDrag={(delta) => {
+                    const el = sidebarShellRef.current
+                    if (!el) return
+                    const total = el.clientHeight
+                    if (total <= 0) return
+                    setSettings((s) => ({
+                      ...s,
+                      layout_sidebar_project_ratio: clamp(
+                        s.layout_sidebar_project_ratio + delta / total,
+                        0.15,
+                        0.85
+                      )
+                    }))
+                  }}
+                  onDragEnd={commitLayout}
+                />
+              )}
+              {settings.show_outline && (
+                <div className="sidebar-segment sidebar-outline">
+                  <OutlinePanel
+                    entries={outline}
+                    selectedLine={outlineLine}
+                    onSelect={(line, col) => {
+                      setOutlineLine(line)
+                      jumpToLine(line, col)
+                    }}
+                  />
+                </div>
+              )}
             </div>
             <ResizeHandle
               axis="x"

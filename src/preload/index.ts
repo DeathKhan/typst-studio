@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { DiagnosticItem, JumpInfo, OutlineEntry, Settings } from '../shared/types'
+import type { DiagnosticItem, FsEntry, JumpInfo, OutlineEntry, Settings, StudioCompletionItem } from '../shared/types'
 
 export interface TypstStudioApi {
   getSettings: () => Promise<Settings>
@@ -24,11 +24,23 @@ export interface TypstStudioApi {
   compilePdf: () => Promise<{ ok: boolean; pdfPath?: string; error?: string }>
   readPdf: (pdfPath: string) => Promise<ArrayBuffer>
   exportPdf: (content: string) => Promise<{ ok: boolean; path?: string; error?: string }>
+  complete: (line: number, col: number, content: string) => Promise<StudioCompletionItem[]>
+  saveClipboardImage: (
+    png: ArrayBuffer
+  ) => Promise<{ ok: boolean; path?: string; error?: string }>
+  getProjectRoot: () => Promise<string | null>
+  listDirectory: (dirPath: string) => Promise<FsEntry[]>
+  openProjectFolder: () => Promise<{
+    root: string
+    opened: { path: string; content: string } | null
+  } | null>
+  openProjectFile: (filePath: string) => Promise<{ path: string; content: string } | null>
   openExternal: (url: string) => Promise<void>
   onDocumentOpened: (cb: (data: { path: string; content: string }) => void) => () => void
   onDiagnostics: (cb: (data: { uri: string; items: DiagnosticItem[] }) => void) => () => void
   onScrollSource: (cb: (jump: JumpInfo) => void) => () => void
   onOutline: (cb: (entries: OutlineEntry[]) => void) => () => void
+  onProjectRootChanged: (cb: (root: string | null) => void) => () => void
   onPdfUpdated: (
     cb: (data: { ok: boolean; pdfPath?: string; error?: string }) => void
   ) => () => void
@@ -48,6 +60,12 @@ const api: TypstStudioApi = {
   compilePdf: () => ipcRenderer.invoke('compile-pdf'),
   readPdf: (pdfPath) => ipcRenderer.invoke('read-pdf', pdfPath),
   exportPdf: (content) => ipcRenderer.invoke('export-pdf', content),
+  complete: (line, col, content) => ipcRenderer.invoke('complete', line, col, content),
+  saveClipboardImage: (png) => ipcRenderer.invoke('save-clipboard-image', png),
+  getProjectRoot: () => ipcRenderer.invoke('get-project-root'),
+  listDirectory: (dirPath) => ipcRenderer.invoke('list-directory', dirPath),
+  openProjectFolder: () => ipcRenderer.invoke('open-project-folder'),
+  openProjectFile: (filePath) => ipcRenderer.invoke('open-project-file', filePath),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
   onDocumentOpened: (cb) => {
     const handler = (_: unknown, data: { path: string; content: string }) => cb(data)
@@ -68,6 +86,11 @@ const api: TypstStudioApi = {
     const handler = (_: unknown, entries: OutlineEntry[]) => cb(entries)
     ipcRenderer.on('outline', handler)
     return () => ipcRenderer.removeListener('outline', handler)
+  },
+  onProjectRootChanged: (cb) => {
+    const handler = (_: unknown, root: string | null) => cb(root)
+    ipcRenderer.on('project-root-changed', handler)
+    return () => ipcRenderer.removeListener('project-root-changed', handler)
   },
   onPdfUpdated: (cb) => {
     const handler = (_: unknown, data: { ok: boolean; pdfPath?: string; error?: string }) =>

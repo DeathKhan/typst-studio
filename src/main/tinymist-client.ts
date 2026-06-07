@@ -14,20 +14,26 @@ import {
   DidSaveTextDocumentNotification,
   PublishDiagnosticsNotification,
   ShowDocumentRequest,
+  CompletionRequest,
   DiagnosticSeverity,
+  CompletionItemKind,
   type Diagnostic,
   type PublishDiagnosticsParams,
-  type TextDocumentItem
+  type TextDocumentItem,
+  type CompletionItem,
+  type CompletionList
 } from 'vscode-languageserver-protocol'
 import type {
   DiagnosticItem,
   JumpInfo,
   OutlineEntry,
   PreviewResult,
+  StudioCompletionItem,
   TinymistStartPreviewResponse
 } from '../shared/types'
 import { PREVIEW_TASK_ID, previewUrlFromResponse } from './preview-url'
 import { resolveTinymistBinary } from './tinymist-path'
+import { getProjectRoot } from './project-root'
 
 export class TinymistClient {
   private proc: ChildProcessWithoutNullStreams | null = null
@@ -132,7 +138,10 @@ export class TinymistClient {
     await this.connection.sendRequest(InitializeRequest.type, {
       processId: process.pid,
       clientInfo: { name: 'typst-studio', version: '0.1.0' },
-      rootUri: null,
+      rootUri: (() => {
+        const root = getProjectRoot()
+        return root ? pathToUri(root) : null
+      })(),
       initializationOptions: {
         customizedShowDocument: true
       },
@@ -141,7 +150,14 @@ export class TinymistClient {
           showDocument: { support: true }
         },
         textDocument: {
-          synchronization: { dynamicRegistration: false }
+          synchronization: { dynamicRegistration: false },
+          completion: {
+            completionItem: {
+              snippetSupport: true,
+              commitCharactersSupport: true,
+              documentationFormat: ['markdown', 'plaintext']
+            }
+          }
         }
       }
     })
@@ -149,8 +165,33 @@ export class TinymistClient {
     await this.connection.sendNotification(InitializedNotification.type, {})
 
     await this.connection.sendNotification('workspace/didChangeConfiguration', {
-      settings: { customizedShowDocument: true }
+      settings: tinymistSettings()
     })
+  }
+
+  async syncDocument(filePath: string, content: string, version: number): Promise<void> {
+    await this.start()
+    await this.conn().sendNotification(DidChangeTextDocumentNotification.type, {
+      textDocument: { uri: pathToUri(filePath), version },
+      contentChanges: [{ text: content }]
+    })
+  }
+
+  async complete(
+    filePath: string,
+    content: string,
+    version: number,
+    line: number,
+    character: number
+  ): Promise<StudioCompletionItem[]> {
+    await this.start()
+    await this.syncDocument(filePath, content, version)
+    const raw = await this.conn().sendRequest(CompletionRequest.type, {
+      textDocument: { uri: pathToUri(filePath) },
+      position: { line, character }
+    })
+    const items = normalizeCompletionItems(raw)
+    return items.map(completionToStudioItem)
   }
 
   async stop(): Promise<void> {
@@ -165,6 +206,12 @@ export class TinymistClient {
       this.proc = null
     }
     this.ready = null
+  }
+
+  /** Restart LSP after project root changes (picks up new rootUri). */
+  async restartWithDocument(filePath: string, content: string): Promise<void> {
+    await this.stop()
+    await this.openDocument(filePath, content)
   }
 
   private conn() {
@@ -206,7 +253,7 @@ export class TinymistClient {
 
   private async ensurePreviewClientConfig(): Promise<void> {
     await this.conn().sendNotification('workspace/didChangeConfiguration', {
-      settings: { customizedShowDocument: true }
+      settings: tinymistSettings()
     })
   }
 
@@ -434,4 +481,73 @@ function parseOutlineNotification(data: unknown): OutlineEntry[] {
     walk(data, 1)
   }
   return entries
+}
+
+function tinymistSettings(): Record<string, unknown> {
+  return { customizedShowDocument: true }
+}
+
+function normalizeCompletionItems(
+  raw: CompletionItem[] | CompletionList | null | undefined
+): CompletionItem[] {
+  if (!raw) return []
+  if (Array.isArray(raw)) return raw
+  return raw.items ?? []
+}
+
+function completionToStudioItem(item: CompletionItem): StudioCompletionItem {
+  const label =
+    typeof item.label === 'string' ? item.label : (item.label?.label ?? '')
+  const textEdit = item.textEdit
+  const insertText =
+    textEdit && 'newText' in textEdit
+      ? textEdit.newText
+      : typeof item.insertText === 'string'
+        ? item.insertText
+        : label
+  const range =
+    textEdit && 'range' in textEdit && textEdit.range
+      ? {
+          start: {
+            line: textEdit.range.start.line,
+            character: textEdit.range.start.character
+          },
+          end: {
+            line: textEdit.range.end.line,
+            character: textEdit.range.end.character
+          }
+        }
+      : undefined
+  return {
+    label,
+    insertText,
+    detail: item.detail ?? undefined,
+    type: completionKindToType(item.kind),
+    ...(range ? { range } : {})
+  }
+}
+
+function completionKindToType(kind: CompletionItemKind | number | undefined): string | undefined {
+  switch (kind) {
+    case CompletionItemKind.Function:
+    case CompletionItemKind.Method:
+      return 'function'
+    case CompletionItemKind.Variable:
+    case CompletionItemKind.Constant:
+      return 'variable'
+    case CompletionItemKind.Keyword:
+    case CompletionItemKind.Snippet:
+      return 'keyword'
+    case CompletionItemKind.Class:
+    case CompletionItemKind.Interface:
+    case CompletionItemKind.TypeParameter:
+      return 'type'
+    case CompletionItemKind.Field:
+    case CompletionItemKind.Property:
+      return 'property'
+    case CompletionItemKind.Text:
+      return 'text'
+    default:
+      return undefined
+  }
 }

@@ -16,6 +16,8 @@ import { ensureTypstWasm, typstEditorExtensions } from '../lib/typst-language'
 import { indexToLineCol } from '../lib/line-index'
 import { vimWithIntegratedStatus } from '../lib/editor-extensions'
 import { attachVimStatusBar } from '../lib/vim-status'
+import { tinymistAutocompletion } from '../lib/tinymist-completion'
+import { imagePasteExtension } from '../lib/image-paste'
 import { EditorStatusBar } from './EditorStatusBar'
 
 export interface EditorPaneProps {
@@ -122,6 +124,8 @@ export function EditorPane({
         settings.word_wrap ? EditorView.lineWrapping : []
       ),
       vimCompartment.current.of(settings.vim_mode ? vimWithIntegratedStatus : []),
+      tinymistAutocompletion(),
+      imagePasteExtension(),
       lintGutter(),
       linter(lintSource),
       EditorView.updateListener.of((u) => {

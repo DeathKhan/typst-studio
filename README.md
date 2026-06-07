@@ -9,6 +9,8 @@ Typst Studio runs [Tinymist](https://github.com/Myriad-Dreamin/tinymist) for lan
 - Live HTML preview (Tinymist) with source ↔ preview navigation
 - PDF preview and export via the `typst` CLI
 - Document outline, diagnostics panel, and find-in-file
+- Tinymist autocomplete (Ctrl+Space)
+- Paste images from the clipboard into `assets/` as `#image(...)`
 - Optional Vim mode
 - Light/dark editor themes and configurable layout
 
@@ -24,6 +26,10 @@ chmod +x typst-studio-*.AppImage
 ```
 
 The AppImage bundles Tinymist. Install the [Typst CLI](https://github.com/typst/typst) separately if you want PDF export or PDF preview mode.
+
+### Windows
+
+Download `typst-studio-*-win.zip` from [GitHub Releases](https://github.com/DeathKhan/typst-studio/releases), extract, and run `Typst Studio.exe`. Tinymist is bundled; install [Typst](https://github.com/typst/typst) for PDF export.
 
 ### Arch Linux (AUR)
 
@@ -91,8 +97,11 @@ On first launch, Typst Studio opens a sample document from `examples/welcome.typ
 |----------|--------|
 | Ctrl+S | Save |
 | Ctrl+F | Find in file |
+| Ctrl+Space | Autocomplete |
 
 With Vim mode enabled, use `:w` to save and `/` to search.
+
+Paste a screenshot or image with Ctrl+V to save it under `assets/` next to the current file and insert a `#image("assets/…")` reference.
 
 ## Tinymist version
 

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Settings } from '../../shared/types'
-import { isThemeDark } from '../../shared/theme-ids'
-import { editorBackgroundColor } from '../lib/themes'
+import { buildPreviewWebviewCss, previewSurfaceJs } from '../lib/preview-surface'
+import { PREVIEW_PAGE_INFO_JS, type PreviewPageInfo } from '../lib/preview-page-info'
 import { PdfPreview } from './PdfPreview'
+import { PreviewPageBadge } from './PreviewPageBadge'
 
 export interface PreviewPaneProps {
   settings: Settings
@@ -27,6 +28,20 @@ export function PreviewPane({
   const onPreviewReadyRef = useRef(onPreviewReady)
   onPreviewReadyRef.current = onPreviewReady
   const [frameError, setFrameError] = useState<string | null>(null)
+  const [pageInfo, setPageInfo] = useState<PreviewPageInfo | null>(null)
+
+  const pollPreviewPages = useCallback(async () => {
+    const node = webviewRef.current
+    if (!node || !webviewDomReadyRef.current) return
+    try {
+      const info = (await node.executeJavaScript(PREVIEW_PAGE_INFO_JS)) as PreviewPageInfo | null
+      if (info && Number.isFinite(info.page) && Number.isFinite(info.total)) {
+        setPageInfo(info)
+      }
+    } catch {
+      /* webview not ready */
+    }
+  }, [])
 
   const markPreviewReady = useCallback(() => {
     if (readyFiredRef.current) return
@@ -45,9 +60,7 @@ export function PreviewPane({
     const node = webviewRef.current
     if (!node || !webviewDomReadyRef.current) return
 
-    const bg = editorBackgroundColor(settings.theme)
-    const scheme = isThemeDark(settings.theme) ? 'dark' : 'light'
-    const css = `html, body { background-color: ${bg} !important; color-scheme: ${scheme}; }`
+    const css = buildPreviewWebviewCss(settings)
 
     try {
       if (insertedCssKeyRef.current) {
@@ -55,22 +68,29 @@ export function PreviewPane({
         insertedCssKeyRef.current = ''
       }
       insertedCssKeyRef.current = await node.insertCSS(css)
+      await node.executeJavaScript(previewSurfaceJs(settings))
     } catch {
-      /* insertCSS requires dom-ready */
+      /* insertCSS / executeJavaScript require dom-ready */
     }
-  }, [settings.theme])
+  }, [settings])
 
   const onWebviewDomReady = useCallback(() => {
     webviewDomReadyRef.current = true
     void applyPreviewSurface()
   }, [applyPreviewSurface])
 
+  const onWebviewLoad = useCallback(() => {
+    void applyPreviewSurface()
+    void pollPreviewPages()
+    markPreviewReady()
+  }, [applyPreviewSurface, pollPreviewPages, markPreviewReady])
+
   const webviewRefCallback = useCallback(
     (node: Electron.WebviewTag | null) => {
       const prev = webviewRef.current
       if (prev && prev !== node) {
         prev.removeEventListener('dom-ready', onWebviewDomReady)
-        prev.removeEventListener('did-finish-load', markPreviewReady)
+        prev.removeEventListener('did-finish-load', onWebviewLoad)
         prev.removeEventListener('did-fail-load', onWebviewFail)
       }
 
@@ -78,19 +98,19 @@ export function PreviewPane({
       if (!node) return
 
       node.addEventListener('dom-ready', onWebviewDomReady)
-      node.addEventListener('did-finish-load', markPreviewReady)
+      node.addEventListener('did-finish-load', onWebviewLoad)
       node.addEventListener('did-fail-load', onWebviewFail)
 
       try {
         const wc = node.getWebContents()
         if (wc && !wc.isLoading()) {
-          markPreviewReady()
+          onWebviewLoad()
         }
       } catch {
         /* getWebContents may throw before attachment */
       }
     },
-    [onWebviewDomReady, markPreviewReady, onWebviewFail]
+    [onWebviewDomReady, onWebviewLoad, onWebviewFail]
   )
 
   useEffect(() => {
@@ -98,6 +118,7 @@ export function PreviewPane({
     readyFiredRef.current = false
     webviewDomReadyRef.current = false
     insertedCssKeyRef.current = ''
+    setPageInfo(null)
     if (readyTimerRef.current) {
       clearTimeout(readyTimerRef.current)
       readyTimerRef.current = null
@@ -105,9 +126,23 @@ export function PreviewPane({
   }, [previewUrl])
 
   useEffect(() => {
+    if (!settings.show_preview_page_count || settings.preview_mode !== 'tinymist' || !previewUrl) {
+      return
+    }
+    const id = window.setInterval(() => {
+      void pollPreviewPages()
+    }, 300)
+    return () => window.clearInterval(id)
+  }, [settings.show_preview_page_count, settings.preview_mode, previewUrl, pollPreviewPages])
+
+  useEffect(() => {
+    if (!settings.show_preview_page_count) setPageInfo(null)
+  }, [settings.show_preview_page_count])
+
+  useEffect(() => {
     if (!previewUrl) return
     void applyPreviewSurface()
-  }, [previewUrl, settings.theme, applyPreviewSurface])
+  }, [previewUrl, applyPreviewSurface])
 
   useEffect(() => {
     return () => {
@@ -115,11 +150,11 @@ export function PreviewPane({
       const node = webviewRef.current
       if (node) {
         node.removeEventListener('dom-ready', onWebviewDomReady)
-        node.removeEventListener('did-finish-load', markPreviewReady)
+        node.removeEventListener('did-finish-load', onWebviewLoad)
         node.removeEventListener('did-fail-load', onWebviewFail)
       }
     }
-  }, [onWebviewDomReady, markPreviewReady, onWebviewFail])
+  }, [onWebviewDomReady, onWebviewLoad, onWebviewFail])
 
   return (
     <div className="preview-pane">
@@ -137,7 +172,7 @@ export function PreviewPane({
       <div className="preview-body">
         {settings.preview_mode === 'tinymist' ? (
           previewUrl ? (
-            <>
+            <div className="preview-viewport">
               {frameError && (
                 <div className="preview-placeholder preview-error">{frameError}</div>
               )}
@@ -150,7 +185,10 @@ export function PreviewPane({
                 allowpopups="true"
                 style={{ display: frameError ? 'none' : undefined }}
               />
-            </>
+              {settings.show_preview_page_count && pageInfo && (
+                <PreviewPageBadge page={pageInfo.page} total={pageInfo.total} />
+              )}
+            </div>
           ) : (
             <div className="preview-placeholder">
               Starting Tinymist preview…
@@ -161,7 +199,16 @@ export function PreviewPane({
             </div>
           )
         ) : pdfPath ? (
-          <PdfPreview pdfPath={pdfPath} zoom={settings.preview_zoom} />
+          <div className="preview-viewport">
+            <PdfPreview
+              pdfPath={pdfPath}
+              zoom={settings.preview_zoom}
+              onPageInfo={setPageInfo}
+            />
+            {settings.show_preview_page_count && pageInfo && (
+              <PreviewPageBadge page={pageInfo.page} total={pageInfo.total} />
+            )}
+          </div>
         ) : (
           <div className="preview-placeholder">Compile PDF to preview</div>
         )}

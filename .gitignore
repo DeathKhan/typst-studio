@@ -12,3 +12,4 @@ src/renderer/assets/*.wasm
 .env
 .env.*
 *.local
+examples/assets/

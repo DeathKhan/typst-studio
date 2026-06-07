@@ -38,7 +38,3 @@ export async function compileTypstToPdf(
     })
   })
 }
-
-export function projectRootFor(filePath: string): string {
-  return dirname(filePath)
-}

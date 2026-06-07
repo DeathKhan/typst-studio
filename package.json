@@ -1,6 +1,6 @@
 {
   "name": "typst-studio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Typst editor with Tinymist LSP and live HTML preview",
   "main": "./out/main/index.js",
   "author": {
@@ -32,6 +32,7 @@
     "download-tinymist": "bash scripts/download-tinymist.sh"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/commands": "^6.8.0",
     "@codemirror/lang-markdown": "^6.3.2",
     "@codemirror/language": "^6.11.0",
@@ -95,6 +96,13 @@
       ],
       "category": "Office",
       "maintainer": "DeathkKhan <DeathKhan@users.noreply.github.com>"
+    },
+    "win": {
+      "target": [
+        "zip"
+      ],
+      "icon": "build/icon.png",
+      "signAndEditExecutable": false
     }
   }
 }
